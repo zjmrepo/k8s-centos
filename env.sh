@@ -1,6 +1,7 @@
 export K8S_VERSION="1.3.6"
 export FLANNEL_VERSION="0.5.5"
 export ETCD_VERSION="3.0.4"
+export DOCKER_VERSION="1.10.3"
 
 export MASTER="root@192.168.1.10"
 export NODES="root@192.168.1.11 root@192.168.1.12 root@192.168.1.13 root@192.168.1.14 root@192.168.1.15"
