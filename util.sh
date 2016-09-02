@@ -179,7 +179,7 @@ function troubleshoot-node() {
 # Clean up on master
 function tear-down-master() {
 echo "[INFO] tear-down-master on ${MASTER}"
-  for service_name in etcd kube-apiserver kube-controller-manager kube-scheduler ; do
+  for service_name in etcd kube-apiserver kube-controller-manager kube-scheduler docker flannel; do
       service_file="/usr/lib/systemd/system/${service_name}.service"
       kube-ssh "$MASTER" " \
         if [[ -f $service_file ]]; then \
@@ -188,6 +188,8 @@ echo "[INFO] tear-down-master on ${MASTER}"
           sudo rm -f $service_file; \
         fi"
   done
+  kube-ssh "${MASTER}" "sudo rm -rf /run/flannel"
+  kube-ssh "${MASTER}" "sudo rm -rf /var/lib/docker"
   kube-ssh "${MASTER}" "sudo rm -rf /opt/kubernetes"
   kube-ssh "${MASTER}" "sudo rm -rf ${KUBE_TEMP}"
   kube-ssh "${MASTER}" "sudo rm -rf /var/lib/etcd"
@@ -208,6 +210,7 @@ echo "[INFO] tear-down-node on $1"
   kube-ssh "$1" "sudo rm -rf /run/flannel"
   kube-ssh "$1" "sudo rm -rf /opt/kubernetes"
   kube-ssh "$1" "sudo rm -rf ${KUBE_TEMP}"
+  kube-ssh "$1" "sudo rm -rf /var/lib/docker"
 }
 
 # Provision master
@@ -229,6 +232,8 @@ function provision-master() {
     sudo chmod -R +x /opt/kubernetes/bin; \
     sudo bash ${KUBE_TEMP}/make-ca-cert.sh ${master_ip} IP:${master_ip},IP:${SERVICE_CLUSTER_IP_RANGE%.*}.1,DNS:kubernetes,DNS:kubernetes.default,DNS:kubernetes.default.svc,DNS:kubernetes.default.svc.cluster.local; \
     sudo bash ${KUBE_TEMP}/master/scripts/etcd.sh; \
+    sudo bash ${KUBE_TEMP}/master/scripts/flannel.sh ${ETCD_SERVERS} ${FLANNEL_NET}; \
+    sudo bash ${KUBE_TEMP}/master/scripts/docker.sh \"${DOCKER_OPTS}\"; \
     sudo bash ${KUBE_TEMP}/master/scripts/apiserver.sh ${master_ip} ${ETCD_SERVERS} ${SERVICE_CLUSTER_IP_RANGE} ${ADMISSION_CONTROL}; \
     sudo bash ${KUBE_TEMP}/master/scripts/controller-manager.sh ${master_ip}; \
     sudo bash ${KUBE_TEMP}/master/scripts/scheduler.sh ${master_ip}"
