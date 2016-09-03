@@ -38,7 +38,7 @@ KUBE_TEMP="~/kube_temp"
 # Must ensure that the following ENV vars are set
 function detect-master() {
   KUBE_MASTER=$MASTER
-  KUBE_MASTER_IP=${MASTER#*@}
+  KUBE_MASTER_IP=${MASTER_IP:-MASTER#*@}
   echo "KUBE_MASTER_IP: ${KUBE_MASTER_IP}" 1>&2
   echo "KUBE_MASTER: ${MASTER}" 1>&2
 }
@@ -46,8 +46,9 @@ function detect-master() {
 # Get node IP addresses and store in KUBE_NODE_IP_ADDRESSES[]
 function detect-nodes() {
   KUBE_NODE_IP_ADDRESSES=()
-  for node in ${NODES}; do
-    KUBE_NODE_IP_ADDRESSES+=("${node#*@}")
+  for node in ${NODES_IP[@]}; do
+    # KUBE_NODE_IP_ADDRESSES+=("${node#*@}")
+    KUBE_NODE_IP_ADDRESSES+=("${node}")
   done
   echo "KUBE_NODE_IP_ADDRESSES: [${KUBE_NODE_IP_ADDRESSES[*]}]" 1>&2
 }
@@ -112,15 +113,17 @@ function validate-cluster() {
 function kube-up() {
   provision-master
 
+  local -i ind=0
   for node in ${NODES}; do
-    provision-node ${node}
+    provision-node ${node} ${NODES_IP[ind]}
+    let "ind += 1"
   done
 
   detect-master
 
   # set CONTEXT and KUBE_SERVER values for create-kubeconfig() and get-password()
   export CONTEXT="centos"
-  export KUBE_SERVER="http://${KUBE_MASTER_IP}:8080"
+  export KUBE_SERVER="http://${MASTER#*@}:8080"
   source "${KUBE_ROOT}/cluster/common.sh"
 
   # set kubernetes user and password
@@ -222,7 +225,7 @@ echo "[INFO] tear-down-node on $1"
 #   SERVICE_CLUSTER_IP_RANGE
 function provision-master() {
   echo "[INFO] Provision master on ${MASTER}"
-  local master_ip=${MASTER#*@}
+  local master_ip=${MASTER_IP:-MASTER#*@}
   ensure-setup-dir ${MASTER}
 
   # scp -r ${SSH_OPTS} master config-default.sh copy-files.sh util.sh "${MASTER}:${KUBE_TEMP}"
@@ -251,9 +254,10 @@ function provision-master() {
 #   DOCKER_OPTS
 function provision-node() {
   echo "[INFO] Provision node on $1"
-  local master_ip=${MASTER#*@}
+  local master_ip=${MASTER_IP:-MASTER#*@}
   local node=$1
-  local node_ip=${node#*@}
+  # local node_ip=${node#*@}
+  local node_ip=$2
   ensure-setup-dir ${node}
 
   kube-scp ${node} "${ROOT}/binaries/node ${ROOT}/node ${ROOT}/config-default.sh ${ROOT}/util.sh" ${KUBE_TEMP}

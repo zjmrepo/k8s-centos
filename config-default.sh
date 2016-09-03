@@ -17,7 +17,7 @@
 ## Contains configuration values for the CentOS cluster
 # The user should have sudo privilege
 export MASTER=${MASTER:-"centos@172.10.0.11"}
-export MASTER_IP=${MASTER#*@}
+export MASTER_IP=${MASTER_IP:-MASTER#*@}
 
 # Define all your minion nodes,
 # And separated with blank space like <user_1@ip_1> <user_2@ip_2> <user_3@ip_3>.
@@ -26,6 +26,8 @@ export NODES=${NODES:-"centos@172.10.0.12 centos@172.10.0.13"}
 
 # Number of nodes in your cluster.
 export NUM_NODES=${NUM_NODES:-2}
+declare -a NODES_IP=(192.168.1.11 192.168.1.12 192.168.1.13 192.168.1.14 192.168.1.15)
+export NODES_IP
 
 # Should be removed when NUM_NODES is deprecated in validate-cluster.sh
 export NUM_NODES=${NUM_NODES}
