@@ -134,7 +134,9 @@ function kube-up() {
 # Delete a kubernetes cluster
 function kube-down() {
   tear-down-master
+  echo ${NODES}
   for node in ${NODES}; do
+    echo ${node}
     tear-down-node ${node}
   done
 }
