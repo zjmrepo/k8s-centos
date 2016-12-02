@@ -144,7 +144,7 @@ function kube-down() {
 function troubleshoot-master() {
   # Troubleshooting on master if all required daemons are active.
   echo "[INFO] Troubleshooting on master ${MASTER}"
-  local -a required_daemon=("kube-apiserver" "kube-controller-manager" "kube-scheduler")
+  local -a required_daemon=("kube-apiserver" "kube-controller-manager" "kube-scheduler" "kube-proxy" "kubelet")
   local daemon
   local daemon_status
   printf "%-24s %-10s \n" "PROCESS" "STATUS"
@@ -184,7 +184,7 @@ function troubleshoot-node() {
 # Clean up on master
 function tear-down-master() {
 echo "[INFO] tear-down-master on ${MASTER}"
-  for service_name in etcd kube-apiserver kube-controller-manager kube-scheduler docker flannel; do
+  for service_name in etcd kube-apiserver kube-controller-manager kube-scheduler kube-proxy kubelet docker flannel; do
       service_file="/usr/lib/systemd/system/${service_name}.service"
       kube-ssh "$MASTER" " \
         if [[ -f $service_file ]]; then \
@@ -241,7 +241,9 @@ function provision-master() {
     sudo bash ${KUBE_TEMP}/master/scripts/docker.sh \"${DOCKER_OPTS}\"; \
     sudo bash ${KUBE_TEMP}/master/scripts/apiserver.sh ${master_ip} ${ETCD_SERVERS} ${SERVICE_CLUSTER_IP_RANGE} ${ADMISSION_CONTROL}; \
     sudo bash ${KUBE_TEMP}/master/scripts/controller-manager.sh ${master_ip}; \
-    sudo bash ${KUBE_TEMP}/master/scripts/scheduler.sh ${master_ip}"
+    sudo bash ${KUBE_TEMP}/master/scripts/scheduler.sh ${master_ip}; \
+    sudo bash ${KUBE_TEMP}/master/scripts/kubelet.sh ${master_ip} ${master_ip}; \
+    sudo bash ${KUBE_TEMP}/master/scripts/proxy.sh ${master_ip} ${master_ip}"
 }
 
 

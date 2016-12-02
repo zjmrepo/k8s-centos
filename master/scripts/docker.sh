@@ -22,7 +22,7 @@ DOCKER_CONFIG=/opt/kubernetes/cfg/docker
 cat <<EOF >$DOCKER_CONFIG
 # DOCKER_OPTS="-H tcp://127.0.0.1:4243 -H unix:///var/run/docker.sock -s devicemapper --selinux-enabled=false ${DOCKER_OPTS}"
 DOCKER_OPTS="-H tcp://127.0.0.1:4243 -H unix:///var/run/docker.sock -s devicemapper --selinux-enabled=false --insecure-registry 9.0.0.0/8 ${DOCKER_OPTS}"
-HTTPS_PROXY=http://webproxy.watson.ibm.com:8080
+#HTTPS_PROXY=http://webproxy.watson.ibm.com:8080
 EOF
 
 cat <<EOF >/usr/lib/systemd/system/docker.service
