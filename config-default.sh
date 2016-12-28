@@ -27,8 +27,8 @@ export NODES=${NODES:-"centos@172.10.0.12 centos@172.10.0.13"}
 # Number of nodes in your cluster.
 export NUM_NODES=${NUM_NODES:-2}
 #declare -a NODES_IP=(192.168.1.11 192.168.1.12 192.168.1.13 192.168.1.14 192.168.1.15)
-#declare -a NODES_IP=(192.168.4.223 192.168.4.224 192.168.4.225)
-declare -a NODES_IP=(192.168.4.101)
+declare -a NODES_IP=(192.168.4.223 192.168.4.224 192.168.4.225)
+#declare -a NODES_IP=(192.168.4.101)
 export NODES_IP
 
 # Should be removed when NUM_NODES is deprecated in validate-cluster.sh
